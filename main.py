@@ -34,6 +34,42 @@ def generate(prompt: str):
     return {"text": text}
 
 
+import time
+from transformers import AutoModelForCausalLM, AutoTokenizer
+model_name = "microsoft/DialoGPT-large"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+
+# Initialize chat history as an empty list
+chat_history_ids = []
+
+@app.get("/generate/v2/")
+def generate_with_context(prompt: str):
+    global chat_history_ids  # Use the global chat history variable
+
+    text = prompt
+    startTime = time.time()
+    input_ids = tokenizer.encode(text + tokenizer.eos_token, return_tensors='pt')
+
+    # Generate the model's response
+    response_ids = model.generate(
+        input_ids,
+        max_length=4096,
+        do_sample=True,
+        top_k=100,
+        temperature=0.75,
+        pad_token_id=tokenizer.eos_token_id
+    )
+
+    # Update the chat history with both the input and response
+    chat_history_ids.extend(input_ids.tolist()[0])
+    chat_history_ids.extend(response_ids.tolist()[0])
+
+    # Decode the response and return
+    output = tokenizer.decode(response_ids[:, input_ids.shape[-1]:][0], skip_special_tokens=True)
+    print(f"BEE6: {output} ({time.time() - startTime:.2f}s)")
+    return {"text": output}
+
 # Run the API
 if __name__ == "__main__":
     print("Running API...")
