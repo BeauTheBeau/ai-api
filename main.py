@@ -113,7 +113,7 @@ def generate_with_context(prompt: str, context: str):
     return {"text": data["output"][0]["contents"][0]["utterance"]}
 
 
-@app.get("/generate/v3/")
+@app.get("/generate/v3/nocontext/")
 def generate_without_context(prompt: str):
     # This uses OneAI's API (https://oneai.com/), using the GPT Skill.
 
