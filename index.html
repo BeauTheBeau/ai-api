@@ -1,40 +1,189 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <title>AI API</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI API Documentation</title>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
+            color: #333;
+            background-color: #e0dfdf;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body, html {
+            height: 100%;
+        }
+
+        main {
+            padding: 1em;
+        }
+
+        h1, h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+
+        h2 {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        p {
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .green {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .yellow {
+            background-color: #ffb144;
+            color: #333;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            margin-top: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                color: #fff;
+                background-color: #171717;
+            }
+
+            h1, h2 {
+                color: #fff;
+            }
+
+            h2 {
+                border-bottom: 2px solid #333;
+            }
+
+            .chip {
+                color: #fff;
+            }
+
+            a {
+                color: #007bff;
+                text-decoration: none;
+            }
+
+            a:hover {
+                text-decoration: underline;
+            }
+
+            section {
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .green {
+                background-color: #4caf50;
+                color: #333;
+            }
+
+            .yellow {
+                background-color: #ffb144;
+                color: #333;
+            }
+
+
         }
     </style>
 </head>
 
 <body>
-<h1>AI API</h1>
 
-<hr>
+<main>
+    <h1>AI API Documentation</h1>
 
-<h2>Routes (v1)</h2>
-<ul>
-    <li><b>/generate/{prompt}</b> Generate text from prompt</li>
-    <li><b>/generate/{prompt}/{context}</b> Generate text from prompt and context</li>
-</ul>
 
-<hr>
+    <section>
+        <h2>Routes (v1)</h2>
+        <div class="chip green">Locally Processed</div>
+        <div class="chip yellow">Moderate Speed</div>
+        <div class="chip yellow">Decent Results</div>
+        <p>Utilizing the <a href="https://pypi.org/project/languagemodels/">LanguageModels library</a> for locally
+            processed, moderately-paced results.</p>
 
-<h2>Routes (v2)</h2>
-<p>Using DialoGPT</p>
-<ul>
-    <li><b>/generate/v2/?prompt={prompt}</b> Generate text from prompt</li>
-</ul>
+        <ul>
+            <li><b>/generate/{prompt}</b> Generate text from a prompt</li>
+            <li><b>/generate/{prompt}/{context}</b> Generate text from a prompt and context</li>
+        </ul>
+    </section>
 
-<hr>
 
-<p>
-    Contribute on <a href="https://github.com/beauthebeau/ai-api">GitHub!</a> |
-    Check out DialoGPT on <a href="https://huggingface.co/microsoft/DialoGPT-medium">Huggingface!</a></p>
+    <section>
+        <h2>Routes (v2)</h2>
+        <div class="chip green">Locally Processed</div>
+        <div class="chip green">Fast</div>
+        <div class="chip yellow">Fair Results</div>
+        <p>Employing DialoGPT for quick, though slightly less accurate, locally processed responses.</p>
 
+        <ul>
+            <li><b>/generate/v2/?prompt={prompt}</b> Generate text from a prompt</li>
+        </ul>
+    </section>
+
+
+    <section>
+
+        <h2>Routes (v3)</h2>
+        <div class="chip green">High-Quality Results</div>
+        <div class="chip green">Fast</div>
+        <div class="chip yellow">Remotely Processed</div>
+        <p>Utilizing OneAI, including GPT-3.5 Turbo, for rapid, high-quality responses through remote processing.</p>
+        <p>Note that OneAI has a 100,000-word limit for the Free Tier.</p>
+
+        <ul>
+            <li><b>/generate/v3/?prompt={prompt}</b> Generate text from a prompt</li>
+            <li><b>/generate/v3/?prompt={prompt}&context={context}</b> Generate text from a prompt and context</li>
+        </ul>
+
+    </section>
+
+    <p style="text-align: center;">
+        Contribute on <a href="https://github.com/beauthebeau/ai-api">GitHub</a> |
+        Explore DialoGPT on <a href="https://huggingface.co/microsoft/DialoGPT-medium">Huggingface</a> |
+        Discover OneAI at <a href="https://oneai.com/">OneAI</a>
+    </p>
+</main>
 </body>
+
 </html>

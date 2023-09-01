@@ -1,16 +1,23 @@
+# Standard Library
+import os
+from dotenv import load_dotenv
+
+# Third-Party
+import requests
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-import languagemodels as lm
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import uvicorn
-import os
+import languagemodels as lm
+
+load_dotenv()
 
 app = FastAPI()
-lm.set_max_ram('4g')
+lm.set_max_ram(os.getenv("MAX_RAM"))  # Ex: 4g or 512m
 
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
-    # Return index.html
     with open(os.path.join(os.path.dirname(__file__), 'index.html'), 'r') as f:
         return f.read()
 
@@ -18,7 +25,6 @@ def read_root():
 # API endpoint for generating text with context
 @app.get("/generate/{prompt}/{context}")
 def generate(prompt: str, context: str):
-    print("w/ context")
     text = lm.do(f"You have been provided the following context: {context} | Respond as helpfully as you can, "
                  f"remember to be very friendly| This is the user's prompt {prompt}")
 
@@ -28,27 +34,24 @@ def generate(prompt: str, context: str):
 # API endpoint for generating text without context
 @app.get("/generate/{prompt}")
 def generate(prompt: str):
-    print("w/o context")
     text = lm.do(f"Respond as helpfully as you can | Remember to be very friendly, greeting the user | This is the "
                  f"user's prompt {prompt}")
     return {"text": text}
 
 
-import time
-from transformers import AutoModelForCausalLM, AutoTokenizer
-model_name = "microsoft/DialoGPT-large"
+model_name = os.getenv("V2_MODEL_NAME")  # Ex: microsoft/DialoGPT-large
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name)
 
 # Initialize chat history as an empty list
 chat_history_ids = []
 
+
 @app.get("/generate/v2/")
 def generate_with_context(prompt: str):
     global chat_history_ids  # Use the global chat history variable
 
     text = prompt
-    startTime = time.time()
     input_ids = tokenizer.encode(text + tokenizer.eos_token, return_tensors='pt')
 
     # Generate the model's response
@@ -57,7 +60,7 @@ def generate_with_context(prompt: str):
         max_length=4096,
         do_sample=True,
         top_k=100,
-        temperature=0.75,
+        temperature=0.25,
         pad_token_id=tokenizer.eos_token_id
     )
 
@@ -67,8 +70,88 @@ def generate_with_context(prompt: str):
 
     # Decode the response and return
     output = tokenizer.decode(response_ids[:, input_ids.shape[-1]:][0], skip_special_tokens=True)
-    print(f"BEE6: {output} ({time.time() - startTime:.2f}s)")
     return {"text": output}
+
+
+@app.get("/generate/v3/")
+def generate_with_context(prompt: str, context: str):
+    # This uses OneAI's API (https://oneai.com/), using the GPT Skill.
+
+    api_key = os.getenv("ONEAI_API_KEY")
+    url = "https://api.oneai.com/api/v0/pipeline"
+
+    if len(prompt) > int(os.getenv("MAX_PROMPT_LENGTH")):
+        return {"text": "Prompt is too long, please keep it under 250 characters >:("}
+
+    headers = {
+        "api-key": api_key,
+        "content-type": "application/json"
+    }
+
+    payload = {
+        "input": prompt,
+        "input_type": "article",
+        "output_type": "json",
+        "multilingual": {
+            "enabled": True
+        },
+        "steps": [
+            {
+                "skill": "gpt",
+                "params": {
+                    "gpt_engine": "text-davinci-003",
+                    "prompt_position": "start",
+                    "temperature": 0,
+                    "prompt": context
+                }
+            }
+        ],
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    data = response.json()
+    return {"text": data["output"][0]["contents"][0]["utterance"]}
+
+
+@app.get("/generate/v3/")
+def generate_without_context(prompt: str):
+    # This uses OneAI's API (https://oneai.com/), using the GPT Skill.
+
+    api_key = os.getenv("ONEAI_API_KEY")
+    url = "https://api.oneai.com/api/v0/pipeline"
+
+    if len(prompt) > int(os.getenv("MAX_PROMPT_LENGTH")):
+        return {"text": "Prompt is too long, please keep it under 250 characters >:("}
+
+    headers = {
+        "api-key": api_key,
+        "content-type": "application/json"
+    }
+
+    payload = {
+        "input": prompt,
+        "input_type": "article",
+        "output_type": "json",
+        "multilingual": {
+            "enabled": True
+        },
+        "steps": [
+            {
+                "skill": "gpt",
+                "params": {
+                    "gpt_engine": "text-davinci-003",
+                    "prompt_position": "start",
+                    "temperature": 0,
+                    "prompt": "Respond as helpfully as you can | Remember to be very friendly, greeting the user"
+                }
+            }
+        ],
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    data = response.json()
+    return {"text": data["output"][0]["contents"][0]["utterance"]}
+
 
 # Run the API
 if __name__ == "__main__":
