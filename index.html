@@ -81,6 +81,18 @@
             padding: 10px;
         }
 
+        li {
+            color: #333;
+        }
+
+        li span.route-url {
+            font-family: "Courier New", Courier, monospace;
+            font-weight: bold;
+            color: #575757;
+            background-color: #f5f5f5;
+            padding: 2px 5px;
+            border-radius: 5px;
+        }
 
         @media (prefers-color-scheme: dark) {
             body {
@@ -107,6 +119,16 @@
 
             a:hover {
                 text-decoration: underline;
+            }
+
+            li {
+                color: #fff;
+            }
+
+            li span.route-url {
+                font-weight: bold;
+                background-color: #333;
+                color: #fff;
             }
 
             section {
@@ -140,11 +162,12 @@
         <div class="chip yellow">Moderate Speed</div>
         <div class="chip yellow">Decent Results</div>
         <p>Utilizing the <a href="https://pypi.org/project/languagemodels/">LanguageModels library</a> for locally
-            processed, moderately-paced results.</p>
+            processed, moderately-paced results with the <a href="https://huggingface.co/MBZUAI/LaMini-Flan-T5-248M">
+                LaMini-Flan-T5-248M</a> model.</p>
 
         <ul>
-            <li><b>/generate/{prompt}</b> Generate text from a prompt</li>
-            <li><b>/generate/{prompt}/{context}</b> Generate text from a prompt and context</li>
+            <li><span class="route-url">/generate/{prompt}</span> Generate text from a prompt</li>
+            <li><span class="route-url">/generate/{prompt}/{context}</span> Generate text from a prompt and context</li>
         </ul>
     </section>
 
@@ -157,7 +180,7 @@
         <p>Employing DialoGPT for quick, though slightly less accurate, locally processed responses.</p>
 
         <ul>
-            <li><b>/generate/v2/?prompt={prompt}</b> Generate text from a prompt</li>
+            <li><span class="route-url">/generate/v2/?prompt={prompt}</span> Generate text from a prompt</li>
         </ul>
     </section>
 
@@ -172,8 +195,11 @@
         <p>Note that OneAI has a 100,000-word limit for the Free Tier.</p>
 
         <ul>
-            <li><b>/generate/v3/?prompt={prompt}</b> Generate text from a prompt</li>
-            <li><b>/generate/v3/?prompt={prompt}&context={context}</b> Generate text from a prompt and context</li>
+            <li><span class="route-url">/generate/v3/?prompt={prompt}</span> Generate text from a prompt</li>
+            <li><span class="route-url">/generate/v3/?prompt={prompt}&context={context}</span> Generate text from a prompt and context</li>
+            <li><span class="route-url">/generate/v3/conversation/?prompt={prompt}&preprompt={preprompt}&context={context}</span> Generate text
+                from a prompt, pre-prompt, and context.
+                This is useful for keeping a conversation going without the model going off on a tangent.
         </ul>
 
     </section>

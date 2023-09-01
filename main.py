@@ -1,5 +1,7 @@
 # Standard Library
 import os
+
+import oneai
 from dotenv import load_dotenv
 
 # Third-Party
@@ -9,6 +11,7 @@ from fastapi.responses import HTMLResponse
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import uvicorn
 import languagemodels as lm
+import oneai
 
 load_dotenv()
 
@@ -151,6 +154,35 @@ def generate_without_context(prompt: str):
     response = requests.post(url, headers=headers, json=payload)
     data = response.json()
     return {"text": data["output"][0]["contents"][0]["utterance"]}
+
+
+@app.get("/generate/v3/conversation/")  # conversation is provided in the body, rather than the URL
+def generate_conversation(prompt: str, preprompt: str, context: str):
+    api_key = os.getenv("ONEAI_API_KEY")
+    oneai.api_key = api_key
+
+    if len(prompt) > int(os.getenv("MAX_PROMPT_LENGTH")) or len(preprompt) > int(
+            os.getenv("MAX_PROMPT_LENGTH")):
+        return {"text": "Prompt is too long, please keep it under 250 characters >:("}
+
+    pipeline = oneai.Pipeline(
+        steps=[
+            oneai.skills.GPT(
+                prompt_position="start",
+                prompt=context,
+                gpt_engine="text-davinci-003",
+                temperature=0
+            )
+        ]
+    )
+
+    conversation = f"""
+    You: {preprompt}
+    User: {prompt}
+    You:"""
+
+    response = pipeline.run(conversation)
+    return {"text": response.gpt_text.text}
 
 
 # Run the API
